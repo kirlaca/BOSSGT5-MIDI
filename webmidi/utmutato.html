@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GT-5 Web MIDI – Használati útmutató</title>
+  <link rel="alternate" hreflang="en" href="guide.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Share+Tech+Mono&display=swap">
+  <link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<div class="wrap">
+  <nav class="pagenav" aria-label="Oldalak">
+    <a class="pagenav-brand" href="index.html">GT-5 Editor · Web MIDI</a>
+    <div class="pagenav-links">
+      <a href="utmutato.html" aria-current="page">Útmutató</a>
+      <a href="guide.html" hreflang="en" lang="en">English</a>
+      <a class="open" href="index.html">Szerkesztő megnyitása</a>
+    </div>
+  </nav>
+  <div class="doc">
+    <aside class="toc" aria-label="Tartalom">
+      <span class="label">Tartalom</span>
+      <ol>
+        <li class="plain"><a href="#mi">Mi ez?</a></li>
+        <li value="1"><a href="#kell">Mi kell hozzá?</a></li>
+        <li value="2"><a href="#inditas">Indítás</a></li>
+        <li value="3"><a href="#kapcsolat">Csatlakozás</a></li>
+        <li value="4"><a href="#fejlec">A fejléc</a></li>
+        <li value="5"><a href="#effektek">Effektek oldal</a></li>
+        <li value="6"><a href="#assign">EXP / CTL / Assign</a></li>
+        <li value="7"><a href="#library">Library oldal</a></li>
+        <li value="8"><a href="#system">System oldal</a></li>
+        <li value="9"><a href="#kuldes">Mi jut el a GT-5-re?</a></li>
+        <li value="10"><a href="#fajlok">Mentés és betöltés</a></li>
+        <li value="11"><a href="#hibak">Gyakori hibák</a></li>
+      </ol>
+    </aside>
+
+    <article class="prose">
+      <header class="stack">
+        <span class="label">GT-5 Editor · Web MIDI</span>
+        <h1>Használati útmutató</h1>
+        <p class="lede">Szerkesztő a BOSS GT-5 gitár multieffekthez (1996), amely teljes egészében a böngészőben fut. A patch effektjei pedálokként jelennek meg, a patch saját effektláncának sorrendjében. A böngésző egy USB-MIDI interfészen át közvetlenül beszél a GT-5-tel: nincs telepítés, nincs szerver.</p>
+      </header>
+
+      <p class="note warn"><strong>Állapot (2026. október 23.):</strong> valódi GT-5-tel, USB-MIDI interfészen át kipróbálva. Hogy mi és hogyan működik, lent olvasható – a GT-5 MIDI-n szeszélyesebb a későbbi BOSS gépeknél: <strong>a patcheit nem lehet lekérdezni</strong> (csak a gépen indított Bulk Dumppal küldi el), és <strong>csak a BULK LOAD oldalán tárol patchet</strong>. Mielőtt bármit a gépre írnál, készíts teljes Bulk Dumpot, és őrizd meg fájlban (<a href="#fajlok">10. pont</a>).</p>
+
+      <h2 id="mi">Mi ez?</h2>
+      <p>A régi Qt-s <em>GT-5 FxFloorBoard</em> böngészős változata. Ugyanazokat a MIDI üzeneteket küldi, ugyanazokat a <code>.syx</code> fájlokat olvassa és írja, de egyetlen weboldal, amely Chrome-ban vagy Edge-ben bármilyen gépen fut.</p>
+      <p>Négy oldala van, a fejléc alatti füleken:</p>
+      <ul>
+        <li><strong>Effects</strong>: a patch 15 effektje pedálként, a lánc sorrendje és minden effektparaméter;</li>
+        <li><strong>EXP / CTL / Assign</strong>: mit vezérel az expression pedál, a CTL pedál és a 8 assign;</li>
+        <li><strong>Library</strong>: mind a 250 patch listában; olvasás, írás, másolás, mentés egyszerre többre;</li>
+        <li><strong>System</strong>: a GT-5 saját beállításai (hangoló, kimenet, MIDI, manual mód, a custom OD/DS és preampok, a felhasználói harmónia-skálák).</li>
+      </ul>
+
+      <h2 id="kell"><span class="num">1</span>Mi kell hozzá?</h2>
+      <ul>
+        <li><strong>Böngésző:</strong> Chrome vagy Edge Windowson, macOS-en, Linuxon vagy Androidon. <strong>Safari és iPhone/iPad nem jó</strong> – azokban nincs Web MIDI.</li>
+        <li><strong>USB-MIDI interfész.</strong> Egy rendes, optocsatolós (pl. Roland UM-ONE mkII). Az olcsó „USB2.0-MIDI” kábelek gyakran átviszik a programváltást, de a SysEx-et (patch olvasás és írás) nem.</li>
+        <li>Androidon ezen felül egy <strong>USB OTG adapter</strong>.</li>
+      </ul>
+
+      <h3 id="bekotes">Bekötés</h3>
+      <div class="wiring" role="img" aria-label="Számítógép vagy telefon, USB, USB-MIDI interfész, két DIN dugó, a GT-5 hátlapja">
+        <span class="node">Számítógép / telefon</span><span class="wire">USB</span>
+        <span class="node">USB-MIDI interfész</span><span class="wire">2 × DIN</span>
+        <span class="node unit">GT-5 hátlap</span>
+      </div>
+      <div class="cross">
+        <div><span class="jackname">interfész OUT</span><span class="arrow">→</span><span class="jackname unit">GT-5 MIDI IN</span></div>
+        <div><span class="jackname">interfész IN</span><span class="arrow">←</span><span class="jackname unit">GT-5 MIDI OUT</span></div>
+      </div>
+      <p>A két dugó <strong>keresztben</strong> megy. Egyes kábeleken fordítva van a felirat – ha nem megy a patchváltás, cseréld meg őket. A szerkesztőnek <strong>mindkét irány</strong> kell: a GT-5 MIDI OUT-ja nélkül küldeni tud, olvasni nem.</p>
+
+      <h2 id="inditas"><span class="num">2</span>Indítás</h2>
+      <p>A szerkesztő a <code>webmidi</code> mappa <code>index.html</code> fájlja. Háromféleképpen nyitható meg:</p>
+      <ul>
+        <li><strong>Webcímről (HTTPS):</strong> ha valahol fel van töltve, nyisd meg a címét. Telefonon is így működik.</li>
+        <li><strong>Közvetlenül a fájlból:</strong> dupla kattintás az <code>index.html</code>-re. Ha így a böngésző nem kér MIDI engedélyt, használd a következőt.</li>
+        <li><strong>Helyi szerverről:</strong> a projekt mappájában <code>node tools/serve.mjs</code>, majd a <code>http://localhost:8000/</code> cím. (Bármilyen statikus webszerver jó; Python nem kell.)</li>
+      </ul>
+      <p class="note">Windowson egy MIDI portot egyszerre csak egy program használhat. Ha a Qt FloorBoard vagy egy DAW fogja az interfészt, zárd be.</p>
+
+      <h2 id="kapcsolat"><span class="num">3</span>Csatlakozás a GT-5-höz</h2>
+      <ol>
+        <li>Kattints a jobb felső sarokban az <strong>Offline</strong> feliratra.</li>
+        <li>Először a böngésző <strong>engedélyt kér a MIDI eszközökhöz (és a SysEx-hez)</strong>: engedélyezd. Ha véletlenül letiltottad, a webhely-beállításokban (a címsor bal oldali ikonja) kapcsold vissza.</li>
+        <li>Ezután:
+          <ul>
+            <li><strong>Auto-detect</strong>: minden porton és mind a 32 device ID-n keresi a GT-5-öt, és magától csatlakozik. Ehhez mindkét irányban működő SysEx kell.</li>
+            <li>Kézzel: válaszd ki az <strong>Output (to GT-5)</strong> és <strong>Input (from GT-5)</strong> portot, a <strong>Device ID</strong>-t és a <strong>Patch change channel</strong>-t (a GT-5 MIDI vételi csatornája), majd <strong>Use these ports</strong>.</li>
+          </ul>
+        </li>
+        <li>Kapcsolódva a felirat zöld, és a portot meg a device ID-t mutatja. A <strong>Go offline</strong> bontja a kapcsolatot.</li>
+        <li>Csatlakozás után a GT-5 átvált a szerkesztőben látható patchre. Kiolvasni a szerkesztő nem tudja (<a href="#kuldes">9. pont</a>): amíg a patchek Bulk Dumppal (vagy mentett dumpfájlból) be nem érkeztek, a feliraton <em>not read</em> áll, és a változtatások nem mennek ki, így a szerkesztő alap-patchje nem írhatja felül a saját hangodat.</li>
+      </ol>
+      <p>A szerkesztő megjegyzi a portokat, és újratöltéskor visszacsatlakozik, ha az interfész be van dugva. Kihúzva offline lesz. Offline minden változtatás a szerkesztőben marad.</p>
+      <p class="note"><strong>Ellenőrzés:</strong> csatlakozás után válts patchet a ◀ ▶ gombokkal. Ha a GT-5 kijelzője követi, a patchváltás működik. A kapcsolat ablakban van egy <strong>MIDI log</strong> mindarról, ami kimegy (→) és bejön (←): válts patchet a GT-5 lábkapcsolóival – ha megjelenik, a GT-5 MIDI OUT-ja eljut a gépig.</p>
+      <p class="note">Az auto-detect a patchváltás csatornáját a device ID-ból veszi (device ID 1 = 1. csatorna). Hogy ez a GT-5-nél mindig így van-e, még nincs ellenőrizve – ha nem megy a patchváltás, állítsd be kézzel a GT-5 vételi csatornájára.</p>
+
+      <h2 id="fejlec"><span class="num">4</span>A fejléc</h2>
+      <p>A fejléc minden oldalon ugyanaz, és mindig a szerkesztett patchről szól.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Elem</th><th>Mit csinál</th></tr></thead>
+        <tbody>
+          <tr><td>◀ ▶ és a kijelző</td><td>Patchváltás mind a 250 patch között (<kbd>←</kbd> <kbd>→</kbd> is). A piros LED-ek a patchet csoport-bank-szám alakban mutatják, mint maga a GT-5: <code>U1-1-1</code>–<code>U4-5-5</code> a 100 user patch, <code>P1-1-1</code>–<code>P6-5-5</code> a 150 preset. A zöld LCD a patch nevét és a PreAmp / OD típusát mutatja.</td></tr>
+          <tr><td>A patch neve</td><td>Rákattintva átnevezhető (legfeljebb 11 karakter). <kbd>Enter</kbd> megtartja, <kbd>Esc</kbd> elveti.</td></tr>
+          <tr><td><strong>EDIT</strong></td><td>Világít, amíg a patchben még nem tárolt változás van.</td></tr>
+          <tr><td><strong>Write</strong></td><td>A szerkesztett hangot egy user patchbe tárolja; megkérdezi, melyikbe, majd végigvezet: a GT-5 a BULK LOAD oldalra („waiting”), Send, a GT-5-ön EXIT, és kb. 5 másodperc várakozás. Presetet nem lehet felülírni.</td></tr>
+          <tr><td><strong>Revert</strong></td><td>Elveti a változtatásokat: vissza a patchhez, ahogy kiválasztáskor volt.</td></tr>
+          <tr><td><strong>Init patch</strong></td><td>Betölti az alap („default”) patchet a szerkesztőbe; a Write tárolja.</td></tr>
+          <tr><td><strong>Load file…</strong> / <strong>Save file…</strong></td><td>Fájlok, lásd <a href="#fajlok">10. pont</a>.</td></tr>
+          <tr><td><strong>Read GT-5</strong></td><td>Elmondja, hogyan küldj Bulk Dumpot a GT-5-ről (csak így adja ki a patcheit); a szerkesztő átveszi, ami jön.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2 id="effektek"><span class="num">5</span>Effects oldal</h2>
+      <h3>Patches (patch-térkép)</h3>
+      <p>User és Preset nézet, oldalanként egy csoport (5 bank × 5 patch), lapozás a ‹ › gombokkal. A még nem olvasott patchek üres, halvány helyek, csak a számukkal; kapcsolódva kiválasztáskor a szerkesztő kiolvassa őket a GT-5-ből. A <strong>szaggatott sárga keret</strong> olyan patchet jelöl, amely csak a szerkesztőben változott (pl. fájlból töltve vagy offline írva) – a GT-5-ön még a régi van.</p>
+
+      <h3>FX Chain</h3>
+      <p>A GT-5-ön mind a 15 effekt sorrendje patchenként állítható. A sáv a patch saját sorrendjét mutatja, és a pedálok is ebben állnak. Egy effektet <strong>húzással</strong> vihetsz új helyre, vagy kijelölve <kbd>Alt</kbd> + <kbd>←</kbd> / <kbd>→</kbd>-vel. Egy effektre kattintva megnyílik a részletes panelje.</p>
+
+      <h3>A pedálok</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Blokk</th><th>Mi ez</th><th>Típusok</th></tr></thead>
+        <tbody>
+          <tr><td><span class="chip" style="--c:#6d57a6;--ink:#fff">FX1</span></td><td>1. speciális effekt</td><td>Feedbacker (vibratóval) vagy Slow Gear</td></tr>
+          <tr><td><span class="chip" style="--c:#2f6cc8;--ink:#fff">CS</span></td><td>Kompresszor</td><td>Compressor vagy Limiter</td></tr>
+          <tr><td><span class="chip" style="--c:#2a2b30;--ink:#e8e8ea">WAH</span></td><td>Wah</td><td>pedálos Wah vagy Auto Wah</td></tr>
+          <tr><td><span class="chip" style="--c:#8a8f99">LOOP</span></td><td>Külső effekthurok</td><td>a hátlapi SEND / RETURN jackek a lánc ezen pontján; Send szint</td></tr>
+          <tr><td><span class="chip" style="--c:#f1c02c">OD/DS</span></td><td>Overdrive / torzító</td><td>11 típus Natural OD-tól Fuzz-ig, plusz <em>Custom 1 / 2</em>, amelyek karakterét a System oldalon állítod</td></tr>
+          <tr><td><span class="chip" style="--c:#c39b45">PRE</span></td><td>Előerősítő</td><td>13 erősítő (JC-120, Clean Twin, Match Drive, Voxy Drive, MS 1959, SLDN Lead, Metal 5150 …), plusz <em>Custom 1 / 2</em> a System oldalról; Bright, Gain</td></tr>
+          <tr><td><span class="chip" style="--c:#4b3a2f;--ink:#f2e6d6">SP</span></td><td>Hangláda-szimulátor</td><td>14 láda, mikrofon pozíció, mikrofon- és direkt szint</td></tr>
+          <tr><td><span class="chip" style="--c:#d5d8dd">EQ</span></td><td>4 sávos parametrikus EQ</td><td>tolószabályzókkal; a középsávok frekvenciája és Q-ja a részletes panelen</td></tr>
+          <tr><td><span class="chip" style="--c:#2e9a8c;--ink:#fff">FX2</span></td><td>Moduláció és más</td><td>Harmonist, Flanger, Phaser, Sub EQ, Short Delay, Humanizer, Ring Mod, Vibrato, Acoustic Sim, Guitar Synth</td></tr>
+          <tr><td><span class="chip" style="--c:#ececec">DD</span></td><td>Delay</td><td>Single, Tap, Reverse, Sound on Sound</td></tr>
+          <tr><td><span class="chip" style="--c:#7cc3e6;--ink:#0f1f28">CE</span></td><td>Chorus</td><td>Mono vagy Stereo</td></tr>
+          <tr><td><span class="chip" style="--c:#d4553b;--ink:#fff">TP</span></td><td>Tremolo / Pan</td><td>Tremolo vagy Pan, négyszög vagy háromszög</td></tr>
+          <tr><td><span class="chip" style="--c:#3b4966;--ink:#f2f4f8">RV</span></td><td>Zengető</td><td>Room 1/2, Hall 1/2, Plate</td></tr>
+          <tr><td><span class="chip" style="--c:#b8bdc5">NS</span></td><td>Zajzár</td><td>Threshold, Release</td></tr>
+          <tr><td><span class="chip" style="--c:#1e1f23;--ink:#e8e8ea">FV</span></td><td>Hangerőpedál</td><td>nincs be/ki kapcsolója; az expression pedál mozgatja</td></tr>
+        </tbody>
+      </table></div>
+      <p>A sor végén a <strong>Master</strong> modul: a patch kimeneti szintje.</p>
+      <ul>
+        <li><strong>Be / ki:</strong> kattints a pedál lábkapcsolójára. A bekapcsolt pedál CHECK LED-je világít, alatta piros sáv.
+          <ul>
+            <li><strong>Élő kapcsoló</strong> (a pedálon <code>CC20</code>…<code>CC27</code> címke): a pedál a patch egy Assign-ján és MIDI CC-n át kapcsol, azonnal, a GT-5 LED-jével együtt. Az elrendezés fix: Assign 1–8 = CC#20–27 → OD/DS, PRE, EQ, FX2, DD, CE, RV, WAH.</li>
+            <li><strong>Élő kapcsoló nélkül</strong> a kikapcsolás azonnal hallatszik, a bekapcsolás viszont csak a <strong>Write</strong> után (a LED addig villog). Ok: a GT-5 a SysEx-szel bekapcsolt effektet hibásan szólaltatja meg (tiszta hang, a Preamp torzítása is eltűnik), amíg a patch újra nem töltődik.</li>
+            <li>Az élő kapcsolókat a <strong>Write</strong> írja a patchbe (a GT-5 ideiglenes patchje Assign-változást nem vesz át). Ha a patch a saját Assign-jait használja (a gyári user patchek közül 32), a szerkesztő megkérdezi, felülírja-e őket. FX2- vagy Wah-típusváltás után a Write a kapcsoló célját is frissíti. Mind a 100 user patch egyszerre: Library → Select shown → Write to GT-5.</li>
+            <li><strong>Live pedals only</strong> (az FX Chain sáv jobb szélén): csak a 8 élő kapcsolós pedál látszik. A működésen nem változtat.</li>
+          </ul>
+        </li>
+        <li><strong>Típus:</strong> OD/DS, PRE, SP, FX2 és RV pedálon a zöld ◀ ▶ ablak (a névre kattintva listából is); FX1, CS, WAH, DD és TP pedálon a kapcsoló. Típusváltáskor kicserélődnek a pedál potméterei.</li>
+        <li><strong>Részletes panel:</strong> a pedálon csak a fő potméterek vannak. A <strong>névtáblára</strong> kattintva alul megnyílik egy panel az adott típus <strong>összes</strong> paraméterével, csoportokban. <kbd>Esc</kbd> vagy ✕ zárja be.</li>
+      </ul>
+      <p><strong>Potméterek:</strong> húzd fel vagy le egérrel vagy ujjal, használd az egérgörgőt (rovátkánként egy lépés), vagy kijelölve a billentyűzetet: <kbd>↑</kbd> / <kbd>↓</kbd> egy lépés, <kbd>PgUp</kbd> / <kbd>PgDn</kbd> nagyobb lépés, <kbd>Home</kbd> / <kbd>End</kbd> minimum / maximum. A Rate potmétereken a 100 feletti értékek hangjegyértékek: <code>1/8</code> nyolcad, <code>1/8T</code> triola, <code>1/8.</code> pontozott.</p>
+
+      <h2 id="assign"><span class="num">6</span>EXP / CTL / Assign oldal</h2>
+      <p>Ezek is a patch részei: minden patchben mást csinálhatnak a pedálok. Bal oldalt a 10 vezérlő: az <strong>EXP pedál</strong>, a <strong>CTL pedál</strong> és az <strong>Assign 1–8</strong>, mindegyiknél hogy be van-e kapcsolva, mit vezérel és mi mozgatja. A kiválasztottnál:</p>
+      <ul>
+        <li>A neve melletti kapcsoló be- és kikapcsolja.</li>
+        <li><strong>Target:</strong> a 126 lehetséges cél (effektek be/ki kapcsolói, minden effekt fő paraméterei, master és hangerőpedál, manual mód, hangoló, MIDI start / stop), effektenként csoportosítva. A <strong>Min</strong> és <strong>Max</strong> a cél saját mértékegységében látszik – pl. Delay Time-nál ezredmásodpercben. Új célnál a Min a cél minimuma, a Max a maximuma lesz. Ha a Min nagyobb a Max-nál, a vezérlésnek fordítva kell működnie (a gépen még nincs ellenőrizve).</li>
+        <li><strong>Source</strong> (csak assign): mi mozgatja – az EXP pedál, a CTL pedál, a külső EXP/CTL pedálok, az <em>Internal Pedal</em>, a <em>Wave Pedal</em>, MIDI velocity / pitch bend vagy egy beérkező MIDI CC. <strong>Mode:</strong> Normal (követi a pedált) vagy Toggle (minden lenyomás vált). Az <strong>aktív tartomány</strong> a forrás útjának az a része, ahol a vezérlés hat.</li>
+        <li><strong>Response:</strong> a görbe mutatja, a forrás 0–127 állása milyen célértéket ad.</li>
+        <li><strong>Internal pedal:</strong> virtuális pedál, amely indításkor (pl. patchváltásra vagy a CTL pedálra) a megadott idő alatt, a választott görbén „magától lenyomódik”. <strong>Wave pedal:</strong> a célt folyamatosan mozgatja a választott hullámformával és sebességgel. Ezek a kártyák halványak, ha nem ők a forrás.</li>
+      </ul>
+
+      <h2 id="library"><span class="num">7</span>Library oldal</h2>
+      <p>Mind a 250 patch táblázatban: név, PreAmp és OD/DS típus, az FX-1 és FX-2 típusa, ha be vannak kapcsolva, a bekapcsolt effektek színes pöttyökkel (lánc sorrendben), és az állapot:</p>
+      <ul>
+        <li><strong>Not read</strong> – még nincs kiolvasva a GT-5-ből;</li>
+        <li><strong>Editor only</strong> – a szerkesztőben változott, a GT-5-ön még a régi van;</li>
+        <li><strong>Editing</strong> – a szerkesztett patch, nem tárolt változással.</li>
+      </ul>
+      <p>Felül szűrés (User / Preset / All) vagy keresés névre. A patch számára kattintva megnyílik az Effects oldalon. Kijelölt patcheken:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Gomb</th><th>Mit csinál</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Select shown</strong> / <strong>Clear selection</strong></td><td>Kijelöli a (szűrés után) látható patcheket / törli a kijelölést.</td></tr>
+          <tr><td><strong>Read from GT-5</strong></td><td>Elmondja, hogyan küldd el őket Bulk Dumppal a GT-5-ről (lekérdezni nem lehet őket).</td></tr>
+          <tr><td><strong>Write to GT-5</strong></td><td>Megerősítés után elküldi a szerkesztő példányait, amíg a GT-5 a BULK LOAD oldalon áll; a GT-5-ön EXIT tárolja őket (csak user patchek).</td></tr>
+          <tr><td><strong>Copy to…</strong></td><td>Sorban egymás utáni user helyekre másolja őket – csak a szerkesztőben; a Write to GT-5 viszi át.</td></tr>
+          <tr><td><strong>Init</strong></td><td>Az init patchet teszi a helyükre (csak a szerkesztőben).</td></tr>
+          <tr><td><strong>Save selected…</strong></td><td>Egy <code>.syx</code> fájlba menti őket.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2 id="system"><span class="num">8</span>System oldal</h2>
+      <p>A GT-5 saját beállításai, a Qt program csoportjai szerint: <strong>Output</strong> (milyen erősítőre / vonalra megy a kimenet, és a hangláda-szimulátor a patchet követi vagy mindig ki/be van kapcsolva), <strong>Global EQ / NS / Reverb</strong> (korrekció minden patchre), <strong>Tuner</strong>, <strong>Controls</strong> (a tárcsa funkciója, a SUB CTL lábkapcsolók, assign hold), <strong>Patch change</strong>, <strong>MIDI</strong> (programváltás ki és a programtábla, a pedálok CC kimenete) és <strong>Manual mode</strong> (mit kapcsol az öt lábkapcsoló).</p>
+      <p>Három GT-5 különlegesség is rendszerbeállítás, közös minden patchben, amely használja:</p>
+      <ul>
+        <li><strong>Custom OD/DS 1 és 2</strong> – a <em>Custom 1</em> és <em>Custom 2</em> OD/DS típus karaktere (bottom, attack, top, típus, mély / közép / magas);</li>
+        <li><strong>Custom PreAmp 1 és 2</strong> – a <em>Custom 1</em> és <em>Custom 2</em> preamp típus hangja (bottom, top, volume típus, 3 sávos hangszínszabályzó, clip, presence, gain, mély / magas, hangláda);</li>
+        <li><strong>User harmony scales</strong> – a Harmonist 29 felhasználói skálája: válassz egyet, majd állítsd be a 12 hang mindegyikéhez a harmóniát.</li>
+      </ul>
+      <ul>
+        <li>Ezek <strong>nem patch-beállítások</strong>: a GT-5 minden változást azonnal eltárol, ezért itt nincs Write.</li>
+        <li>A GT-5 a rendszerbeállításait csak a gépen indított Bulk Dumpban küldi el; amíg ilyen nem jött (vagy fájl nem töltődött be), az oldal az alapértékeket mutatja.</li>
+        <li>A <strong>Send all to GT-5</strong> minden látható beállítást kiküld (pl. egy mentett fájl visszaállításához). <strong>Load file…</strong> / <strong>Save file…</strong>: az összes rendszerbeállítás egy fájlban (1367 bájt, a FloorBoard formátuma).</li>
+      </ul>
+
+      <h2 id="kuldes"><span class="num">9</span>Mi jut el a GT-5-re, és mikor?</h2>
+      <p>Valódi GT-5-tel kipróbálva (2026. október). A GT-5 a maga módján kezeli a MIDI-t – ez működik:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Mi</th><th>Hogyan</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Patchváltás</strong></td><td>Azonnal egy Program Change; a GT-5 átvált.</td></tr>
+          <tr><td><strong>Élő szerkesztés</strong> (potméterek, kapcsolók, típusok, név, lánc sorrend)</td><td>Azonnal a GT-5 <em>ideiglenes</em> patchébe megy, üzenetenként egy paraméter, mindegyik után egy „Sound Change Request” – ettől szól azonnal, bármit mutat a GT-5 kijelzője. A kijelzőn villogó pont jelzi, hogy a patch módosult. Egy <strong>kikapcsolt</strong> effekt paraméterét a GT-5 eldobja; élő kapcsolós effektnél a szerkesztő bekapcsoláskor újraküldi, a többinél a Write után szól. A GT-5 EXIT gombja nem dob el semmit. <strong>Ez még nincs elmentve:</strong> patchváltáskor elveszik. Az EXP / CTL / Assign beállítások az ideiglenes patchben nem változnak – csak a kiírt patchben hatnak.</td></tr>
+          <tr><td><strong>Amit hallasz, elmentése</strong></td><td>Vagy a szerkesztő <strong>Write</strong> gombja (következő sor), vagy a GT-5 saját <strong>WRITE</strong> gombja: az az ideiglenes patchet menti, az élő változtatásokkal együtt.</td></tr>
+          <tr><td><strong>Write / Write to GT-5</strong></td><td>A GT-5 csak a <strong>BULK LOAD</strong> oldalán tárol patchet: UTILITY → MIDI → PARAMETER, amíg BULK LOAD nem lesz, ott „waiting” áll. A szerkesztő küld, a GT-5 „receiving”-et mutat. Utána <strong>EXIT</strong>: a GT-5 ellenőrzi és eltárolja az adatot, ez kb. 5 másodperc. Normál játék közben küldve az írást figyelmen kívül hagyja.</td></tr>
+          <tr><td><strong>Patchek beolvasása</strong></td><td>Csak a <strong>gépen indított Bulk Dumppal</strong> (UTILITY → MIDI → PARAMETER, amíg BULK DUMP nem lesz; a tartomány választható, pl. TEMP → TEMP az aktuális patch, vagy a teljes memória). Ha egy program kérdezi, a GT-5 csak az első blokkot küldi helyesen, a többit belső formában – a szerkesztő nem kérdez.</td></tr>
+          <tr><td><strong>Revert, Init patch, fájl betöltése</strong></td><td>Csak ami változott, az megy ki, lassan. Egy egész más patch több, mint amit a GT-5 élőben bír (megtelik a MIDI puffere: „overflow” a kijelzőn, EXIT eltünteti) – ilyenkor a szerkesztő nem küldi: írd ki, aztán válaszd ki.</td></tr>
+          <tr><td><strong>System oldal</strong></td><td>Minden változás azonnal a GT-5-re kerül.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2 id="fajlok"><span class="num">10</span>Mentés és betöltés</h2>
+      <p>A fájlok oda kerülnek, ahová a böngésző letölt (általában a <em>Letöltések</em> mappa), betölteni bárhonnan lehet. A formátum a Qt FloorBoard <code>.syx</code>-e, így a fájlok szabadon mozognak a két program között.</p>
+      <ul>
+        <li><strong>Először mentés:</strong> indíts a GT-5-ön teljes Bulk Dumpot (rendszer + az összes user patch). A szerkesztő átveszi, és a Library oldalra lép: Select shown → Save selected…, és System → Save file…. Hosszú dump a böngészőben megszakadhat (lásd lent); megbízhatóbban jön a projekt kis Windowsos eszközével: <code>python tools\gt5_tester.py receive --in DOREMiDi --file sajat-gt5.syx</code> – a <strong>Load file…</strong> pedig a teljes dumpot (patchek és rendszer) egyben betölti a szerkesztőbe.</li>
+        <li><strong>Save file…</strong> (fejléc): <em>This patch, as edited</em>, vagy <em>All user patches</em> egy fájlban.</li>
+        <li><strong>Load file…</strong> (fejléc, vagy a fájlt az ablakra ejtve): egy patch a szerkesztőbe, több a user helyekre (kiírásig <em>Editor only</em>), a rendszerfájl a System oldalra, egy teljes dump mindenhova. A hibás ellenőrzőösszegű fájlok – a régi GT-5 fájlok közt gyakoriak – így is betöltődnek.</li>
+        <li>Új dump csak akkor kell, ha <em>a GT-5-ön magán</em> változtattál patchet; amit a szerkesztő írt ki, azt tudja.</li>
+      </ul>
+
+      <h2 id="hibak"><span class="num">11</span>Gyakori hibák</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Tünet</th><th>Megoldás</th></tr></thead>
+        <tbody>
+          <tr><td>„This browser has no Web MIDI”</td><td>A böngészőben nincs Web MIDI (pl. Safari, iPhone). Használj Chrome-ot vagy Edge-et.</td></tr>
+          <tr><td>„MIDI access denied”</td><td>A MIDI engedély le van tiltva. Engedélyezd a webhely-beállításokban (a címsor bal oldali ikonja), és töltsd újra. Ha közvetlenül a fájlt nyitottad meg és nem jön kérdés, indítsd helyi szerverről (<a href="#inditas">2. pont</a>).</td></tr>
+          <tr><td>„No MIDI ports found”</td><td>Az interfész nincs bedugva vagy nem ismerte fel a gép. Dugd be, és nyisd meg újra a kapcsolat ablakot.</td></tr>
+          <tr><td>„could not open any MIDI input”</td><td>Egy másik program (a Qt FloorBoard, egy DAW, egy másik böngészőfül a szerkesztővel) fogja a portot. Zárd be, és próbáld újra.</td></tr>
+          <tr><td>Semmi nem jön be – a GT-5 saját patchváltásai sem a MIDI logban</td><td>Beragadt az USB-MIDI interfész bemenete (hosszú vagy hibás SysEx után láttuk). Húzd ki az USB-dugóját, várj pár másodpercet, dugd vissza.</td></tr>
+          <tr><td>A Bulk Dump a böngészőben megszakad</td><td>Fogadd a <code>tools\gt5_tester.py receive</code> paranccsal, és töltsd be a fájlt (<a href="#fajlok">10. pont</a>). Ha utána semmi nem jön be, dugd újra az interfészt (előző sor).</td></tr>
+          <tr><td>A GT-5 „overflow”-t ír</td><td>Megtelt a MIDI puffere: túl sok változtatás egymás után, vagy menüben volt közben. Nyomj EXIT-et; a normál kijelzőn szerkessz.</td></tr>
+          <tr><td>A GT-5 beakad a „DATA SENDING…” feliratnál</td><td>Valami patchadatot kért tőle (ez a szerkesztő nem kér; a régi FloorBoard és annak auto-detectje igen). Kapcsold ki-be.</td></tr>
+          <tr><td>„no GT-5 patch data in this file”</td><td>A fájl másik gépé (GT-3, GT-6 …), vagy nem patch-fájl.</td></tr>
+          <tr><td>A patchváltás nem megy</td><td>A patchváltás csatornája eltér a GT-5 vételi csatornájától. Állítsd be a kapcsolat ablakban.</td></tr>
+          <tr><td>A Write nem csinált semmit</td><td>A GT-5 nem a BULK LOAD oldalon („waiting”) állt a küldéskor, vagy utána nem nyomtál EXIT-et (<a href="#kuldes">9. pont</a>).</td></tr>
+          <tr><td>Szerkesztés közben nem változik a név a kijelzőn</td><td>Normális: a GT-5 a tárolt nevet mutatja; a szerkesztett a WRITE gombjára és tárolás után látszik.</td></tr>
+          <tr><td>Patchváltás után elveszett egy változtatás</td><td>Patchváltás előtt Write (vagy a GT-5 WRITE gombja).</td></tr>
+        </tbody>
+      </table></div>
+    </article>
+  </div>
+
+  <footer>
+    <p>Rajongói projekt, nem kapcsolódik a BOSS / Roland Corporationhöz. A BOSS és a GT-5 a Roland Corporation védjegyei. A paramétertábla és a fájlformátum a nyílt forrású GT-5 FxFloorBoardból származik.</p>
+  </footer>
+</div>
+</body>
+</html>

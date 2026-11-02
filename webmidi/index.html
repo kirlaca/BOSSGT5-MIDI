@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GT-5 Editor (Web MIDI)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-model">GT-5</span>
+      <span class="brand-sub">Guitar Effects Processor</span>
+      <span class="brand-tag">Web MIDI</span>
+    </div>
+    <div class="topbar-right">
+      <nav class="doc-links" aria-label="Guides">
+        <a href="utmutato.html" hreflang="hu" lang="hu">Útmutató</a>
+        <a href="guide.html">Guide</a>
+      </nav>
+      <button id="conn-status" class="status" type="button">
+        <span class="dot"></span><span id="conn-text">Offline</span>
+      </button>
+    </div>
+  </header>
+
+  <section class="unit">
+    <div class="patch-nav">
+      <button id="prev" class="nav-btn" type="button" aria-label="Previous patch">&#9664;</button>
+      <div class="display" aria-live="polite">
+        <div class="led-display">
+          <span id="patch-label" class="display-digits">U1-1-1</span>
+          <span id="edited" class="edited">EDIT</span>
+        </div>
+        <div class="lcd">
+          <button id="patch-name" class="lcd-name" type="button" title="Rename the patch">default</button>
+          <input id="name-input" class="lcd-name lcd-input" type="text" maxlength="11" spellcheck="false"
+            autocomplete="off" aria-label="Patch name" hidden>
+          <span id="lcd-info" class="lcd-info"></span>
+        </div>
+      </div>
+      <button id="next" class="nav-btn" type="button" aria-label="Next patch">&#9654;</button>
+    </div>
+
+    <div class="actions">
+      <button id="store" class="btn" type="button" title="Store the edited sound in a user patch">Write</button>
+      <button id="revert" class="btn" type="button" title="Throw away edits to this patch">Revert</button>
+      <!-- No auto write on the GT-5: it stores patches only through its BULK LOAD page. -->
+      <label class="toggle" hidden title="Write edits into the current user patch automatically, 5 s after the last change">
+        <input id="auto-write" type="checkbox"> Auto write
+      </label>
+      <span class="sep"></span>
+      <button id="lib-init" class="btn" type="button" title="Load the init patch into the editor">Init patch</button>
+      <button id="lib-load" class="btn" type="button">Load file…</button>
+      <button id="lib-save" class="btn" type="button">Save file…</button>
+      <input id="file-input" type="file" accept=".syx,application/octet-stream" hidden>
+      <button id="lib-read" class="btn" type="button" title="Read the 100 user patches from the GT-5">Read GT-5</button>
+      <span id="source" class="source"></span>
+    </div>
+  </section>
+
+  <nav class="tabs" aria-label="Pages">
+    <a class="tab" href="#effects" data-view="effects">Effects</a>
+    <a class="tab" href="#assign" data-view="assign">EXP / CTL / Assign</a>
+    <a class="tab" href="#library" data-view="library">Library</a>
+    <a class="tab" href="#system" data-view="system">System</a>
+  </nav>
+
+  <div id="view-effects">
+  <details class="patch-map" open>
+    <summary>Patches</summary>
+    <div class="pm-head">
+      <div id="pm-area" class="seg area-seg"></div>
+      <div class="pm-pager">
+        <button id="pm-prev" class="btn small" type="button" aria-label="Previous banks">&#8249;</button>
+        <span id="pm-range"></span>
+        <button id="pm-next" class="btn small" type="button" aria-label="Next banks">&#8250;</button>
+      </div>
+    </div>
+    <div id="patch-map" class="pm-banks"></div>
+  </details>
+
+  <section class="chain-bar">
+    <span class="bar-title">FX Chain</span>
+    <span class="jack">INPUT</span>
+    <ol id="chain-chips" class="chips"></ol>
+    <span class="jack">OUTPUT</span>
+    <span class="bar-hint">Drag a block (or Alt + ← / →) to change its place in the chain</span>
+    <label class="bar-check" title="Show only OD, PRE, EQ, FX2, DD, CE, RV and WAH - the effects with a live switch (Assign 1-8 = CC#20-27)">
+      <input id="live-only" type="checkbox"> Live pedals only
+    </label>
+  </section>
+
+  <main class="board">
+    <div id="chain" class="chain"></div>
+  </main>
+
+  <aside id="detail" class="detail" hidden aria-label="Effect details"></aside>
+  </div>
+
+  <div id="view-assign" class="assign-page" hidden>
+    <aside class="ctl-list">
+      <span class="list-title">Controllers in this patch</span>
+      <div id="ctl-list"></div>
+    </aside>
+    <main id="ctl-detail" class="ctl-detail"></main>
+  </div>
+
+  <div id="view-library" class="page" hidden>
+    <div class="lib-bar">
+      <div id="lib-area" class="seg area-seg"></div>
+      <input id="lib-filter" class="lib-filter" type="search" placeholder="Find by name…" aria-label="Find patches by name"
+        autocomplete="off" spellcheck="false">
+      <span id="lib-count" class="muted"></span>
+    </div>
+    <div class="lib-bar">
+      <button id="lib-sel-all" class="btn small" type="button">Select shown</button>
+      <button id="lib-sel-none" class="btn small" type="button">Clear selection</button>
+      <span class="sep"></span>
+      <button id="lib-read-sel" class="btn small" type="button" title="Read the selected patches from the GT-5">Read from GT-5</button>
+      <button id="lib-write-sel" class="btn small" type="button" title="Store the selected user patches on the GT-5">Write to GT-5</button>
+      <button id="lib-copy" class="btn small" type="button" title="Copy the selected patches into user patches">Copy to…</button>
+      <button id="lib-init-sel" class="btn small" type="button" title="Put the init patch into the selected user patches">Init</button>
+      <button id="lib-save-sel" class="btn small" type="button" title="Save the selected patches as one .syx file">Save selected…</button>
+    </div>
+    <div class="lib-table-wrap">
+      <table class="lib-table">
+        <thead>
+          <tr>
+            <th scope="col"><span class="visually-hidden">Selected</span></th>
+            <th scope="col">Patch</th>
+            <th scope="col">Name</th>
+            <th scope="col">PreAmp</th>
+            <th scope="col">OD / DS</th>
+            <th scope="col">FX-1 · FX-2</th>
+            <th scope="col">Effects on</th>
+            <th scope="col">State</th>
+          </tr>
+        </thead>
+        <tbody id="lib-rows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="view-system" class="page" hidden>
+    <div class="sys-head">
+      <div>
+        <h1>System settings</h1>
+        <p class="muted">Not part of any patch. The GT-5 stores a change at once - there is no Write for these.</p>
+      </div>
+      <div class="actions">
+        <button id="sys-read" class="btn" type="button">Read from GT-5</button>
+        <button id="sys-send" class="btn" type="button" title="Send every system setting shown here to the GT-5">Send all to GT-5</button>
+        <button id="sys-load" class="btn" type="button">Load file…</button>
+        <button id="sys-save" class="btn" type="button">Save file…</button>
+        <input id="sys-file" type="file" accept=".syx,application/octet-stream" hidden>
+        <span id="sys-source" class="source"></span>
+      </div>
+    </div>
+    <div id="sys-groups" class="sys-groups"></div>
+  </div>
+
+  <dialog id="conn-dialog">
+    <form method="dialog">
+      <h2>MIDI connection</h2>
+      <p class="hint">The browser talks to the MIDI interface directly (Web MIDI) - allow MIDI / SysEx access when it
+        asks. Auto-detect asks every port on all 32 device IDs and takes the one the GT-5 answers on.
+        Picking ports by hand works for patch changes even when SysEx replies don't come back.</p>
+      <label class="field">Output (to GT-5)<select id="port-out"></select></label>
+      <label class="field">Input (from GT-5)<select id="port-in"></select></label>
+      <div class="field-row">
+        <label class="field">Device ID<select id="port-dev"></select></label>
+        <label class="field">Patch change channel<select id="port-channel"></select></label>
+      </div>
+      <p id="conn-msg" class="hint"></p>
+      <details class="midi-log">
+        <summary>MIDI log <span class="muted">(what went out → and came in ←)</span></summary>
+        <pre id="midi-log"></pre>
+        <button id="midi-log-copy" class="btn small" type="button">Copy log</button>
+      </details>
+      <div class="dialog-actions">
+        <button id="conn-disconnect" class="btn" type="button">Go offline</button>
+        <button id="conn-detect" class="btn" type="button">Auto-detect</button>
+        <button id="conn-use" class="btn primary" type="button">Use these ports</button>
+        <button class="btn" value="cancel">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="write-dialog">
+    <form method="dialog">
+      <h2>Write patch</h2>
+      <p class="hint">The edited sound is stored in the user patch you pick. Presets can't be overwritten.</p>
+      <label class="field">Into user patch<select id="write-target"></select></label>
+      <p id="write-msg" class="hint"></p>
+      <div class="dialog-actions">
+        <button class="btn" value="cancel">Cancel</button>
+        <button id="write-ok" class="btn primary" type="button">Write</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="file-dialog">
+    <form method="dialog">
+      <h2>Save to file</h2>
+      <fieldset class="choice">
+        <label><input type="radio" name="save-what" value="patch" checked> This patch, as edited</label>
+        <label><input type="radio" name="save-what" value="bank"> All user patches (bulk dump)</label>
+      </fieldset>
+      <p id="file-msg" class="hint"></p>
+      <label class="field">File name<input id="file-name" type="text" autocomplete="off" spellcheck="false"></label>
+      <div class="dialog-actions">
+        <button class="btn" value="cancel">Cancel</button>
+        <button id="file-ok" class="btn primary" type="button">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="copy-dialog">
+    <form method="dialog">
+      <h2>Copy patches</h2>
+      <p id="copy-msg" class="hint"></p>
+      <label class="field">Into user patches, starting at<select id="copy-target"></select></label>
+      <div class="dialog-actions">
+        <button class="btn" value="cancel">Cancel</button>
+        <button id="copy-ok" class="btn primary" type="button">Copy</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <script src="gt5-params.js"></script>
+  <script src="factory.js"></script>
+  <script src="gt5.js"></script>
+  <script src="midi.js"></script>
+  <script src="ask.js"></script>
+  <script src="effects.js"></script>
+  <script src="assign.js"></script>
+  <script src="library.js"></script>
+  <script src="system.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

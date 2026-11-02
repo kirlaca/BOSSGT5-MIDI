@@ -1,0 +1,19 @@
+# BOSS GT-5 Service Notes (Roland, copyrighted) - kept locally, not redistributed
+docs/*.pdf
+# Subversion leftovers in the Qt FloorBoard source
+.svn/
+# Qt FloorBoard source: only the data the tools read (and its license) are kept in git
+/gt-5fxfloorboard_source_code_20250419/*
+!/gt-5fxfloorboard_source_code_20250419/license.txt
+!/gt-5fxfloorboard_source_code_20250419/midi.xml
+!/gt-5fxfloorboard_source_code_20250419/default.syx
+!/gt-5fxfloorboard_source_code_20250419/system.syx
+!/gt-5fxfloorboard_source_code_20250419/packager/
+/gt-5fxfloorboard_source_code_20250419/packager/*
+!/gt-5fxfloorboard_source_code_20250419/packager/Init Patches/
+!/gt-5fxfloorboard_source_code_20250419/packager/saved patches/
+
+# Python caches and pedal dumps (the user's own patches) - kept locally
+__pycache__/
+/*.syx
+/tools/*.syx

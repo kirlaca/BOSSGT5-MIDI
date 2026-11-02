@@ -1,0 +1,2 @@
+# SysEx dumps are binary - no line-ending conversion
+*.syx binary

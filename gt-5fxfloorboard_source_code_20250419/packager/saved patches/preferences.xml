@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Preferences of the GT-5 Fx FloorBoard application. -->
+<Preferences>
+	<General>
+		<Application version="20100208"/>
+		<Donate url="http://gtx.tinfoilmusic.net/donate.html"/>
+		<Files dir=""/>
+		<Help url="GT-3EditorManual_E.htm"/>
+		<Language code="en"/>
+		<Upload url="http://www.bossgtcentral.com/dm"/>
+		<Webpage url="http://gtx.tinfoilmusic.net/"/>
+	</General>
+	<Language>
+		<Locale select="0"/>
+	</Language>
+	<Midi>
+		<DBug bool="true"/>
+		<Delay set="0"/>
+		<MidiIn device="0"/>
+		<MidiOut device="8"/>
+		<Time set="45"/>
+	</Midi>
+	<Window>
+		<Collapsed width="1176" defaultwidth="1210" bool="true"/>
+		<Position x="" y=""/>
+		<Restore window="false" sidepanel="true"/>
+		<Size width="" minwidth="1014" height="" minheight="548"/>
+		<Splash bool="true"/>
+	</Window>
+</Preferences>

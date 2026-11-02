@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GT-5 Web MIDI – User guide</title>
+  <link rel="alternate" hreflang="hu" href="utmutato.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Share+Tech+Mono&display=swap">
+  <link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<div class="wrap">
+  <nav class="pagenav" aria-label="Pages">
+    <a class="pagenav-brand" href="index.html">GT-5 Editor · Web MIDI</a>
+    <div class="pagenav-links">
+      <a href="utmutato.html" hreflang="hu" lang="hu">Magyar</a>
+      <a href="guide.html" aria-current="page">Guide</a>
+      <a class="open" href="index.html">Open the editor</a>
+    </div>
+  </nav>
+  <div class="doc">
+    <aside class="toc" aria-label="Contents">
+      <span class="label">Contents</span>
+      <ol>
+        <li class="plain"><a href="#what">What is this?</a></li>
+        <li value="1"><a href="#need">What you need</a></li>
+        <li value="2"><a href="#start">Starting</a></li>
+        <li value="3"><a href="#connect">Connecting</a></li>
+        <li value="4"><a href="#header">The header</a></li>
+        <li value="5"><a href="#effects">Effects page</a></li>
+        <li value="6"><a href="#assign">EXP / CTL / Assign</a></li>
+        <li value="7"><a href="#library">Library page</a></li>
+        <li value="8"><a href="#system">System page</a></li>
+        <li value="9"><a href="#sending">What reaches the GT-5?</a></li>
+        <li value="10"><a href="#files">Saving and loading</a></li>
+        <li value="11"><a href="#problems">Troubleshooting</a></li>
+      </ol>
+    </aside>
+
+    <article class="prose">
+      <header class="stack">
+        <span class="label">GT-5 Editor · Web MIDI</span>
+        <h1>User guide</h1>
+        <p class="lede">An editor for the BOSS GT-5 guitar multi-effects (1996) that runs entirely in the browser. The patch's effects appear as pedals, in the order of the patch's own effect chain. The browser talks to the GT-5 directly through a USB-MIDI interface: nothing to install, no server.</p>
+      </header>
+
+      <p class="note warn"><strong>Status (23 Oct 2026):</strong> tried with a real GT-5 through a USB-MIDI interface. What works and how is below – the GT-5 is fussier over MIDI than later BOSS units: it <strong>can't be asked for its patches</strong> (it sends them only with a Bulk Dump started on the unit), and it <strong>stores patches only on its BULK LOAD page</strong>. Before writing anything, take a full Bulk Dump and keep it as a file (<a href="#files">section 10</a>).</p>
+
+      <h2 id="what">What is this?</h2>
+      <p>A browser version of the old Qt <em>GT-5 FxFloorBoard</em>. It sends the same MIDI messages and reads and writes the same <code>.syx</code> files, but it is a single web page that runs in Chrome or Edge on any computer.</p>
+      <p>It has four pages, on the tabs below the header:</p>
+      <ul>
+        <li><strong>Effects</strong>: the patch's 15 effects as pedals, the chain order and every effect parameter;</li>
+        <li><strong>EXP / CTL / Assign</strong>: what the expression pedal, the CTL pedal and the 8 assigns control;</li>
+        <li><strong>Library</strong>: all 250 patches in a list; read, write, copy and save many at once;</li>
+        <li><strong>System</strong>: the GT-5's own settings (tuner, output, MIDI, manual mode, the custom OD/DS and preamps, the user harmony scales).</li>
+      </ul>
+
+      <h2 id="need"><span class="num">1</span>What you need</h2>
+      <ul>
+        <li><strong>Browser:</strong> Chrome or Edge on Windows, macOS, Linux or Android. <strong>Safari and iPhone/iPad won't work</strong> – they have no Web MIDI.</li>
+        <li><strong>A USB-MIDI interface.</strong> A decent, opto-isolated one (e.g. Roland UM-ONE mkII). Cheap "USB2.0-MIDI" cables often pass program changes but not SysEx (patch read and write).</li>
+        <li>On Android also a <strong>USB OTG adapter</strong>.</li>
+      </ul>
+
+      <h3 id="wiring">Wiring</h3>
+      <div class="wiring" role="img" aria-label="Computer or phone, USB, USB-MIDI interface, two DIN plugs, GT-5 rear panel">
+        <span class="node">Computer / phone</span><span class="wire">USB</span>
+        <span class="node">USB-MIDI interface</span><span class="wire">2 × DIN</span>
+        <span class="node unit">GT-5 rear panel</span>
+      </div>
+      <div class="cross">
+        <div><span class="jackname">interface OUT</span><span class="arrow">→</span><span class="jackname unit">GT-5 MIDI IN</span></div>
+        <div><span class="jackname">interface IN</span><span class="arrow">←</span><span class="jackname unit">GT-5 MIDI OUT</span></div>
+      </div>
+      <p>The two plugs go in <strong>crossed over</strong>. Some cables are labelled the other way round – if patch changes don't work, swap them. The editor needs <strong>both directions</strong>: without the GT-5's MIDI OUT it can send but not read.</p>
+
+      <h2 id="start"><span class="num">2</span>Starting</h2>
+      <p>The editor is <code>index.html</code> in the <code>webmidi</code> folder. Three ways to open it:</p>
+      <ul>
+        <li><strong>From a web address (HTTPS):</strong> if it is hosted somewhere, open its address. This is also how it works on a phone.</li>
+        <li><strong>Straight from the file:</strong> double-click <code>index.html</code>. If the browser doesn't ask for MIDI access this way, use the next option.</li>
+        <li><strong>From a local server:</strong> in the project folder run <code>node tools/serve.mjs</code> and open <code>http://localhost:8000/</code>. (Any static web server will do; no Python needed.)</li>
+      </ul>
+      <p class="note">On Windows only one program can use a MIDI port at a time. If the Qt FloorBoard or a DAW holds the interface, close it.</p>
+
+      <h2 id="connect"><span class="num">3</span>Connecting to the GT-5</h2>
+      <ol>
+        <li>Click <strong>Offline</strong> in the top right corner.</li>
+        <li>The first time, the browser <strong>asks for permission to use MIDI devices (and SysEx)</strong>: allow it. If you blocked it by mistake, re-enable it in the site settings (the icon at the left of the address bar).</li>
+        <li>Either:
+          <ul>
+            <li><strong>Auto-detect</strong>: looks for the GT-5 on every port and all 32 device IDs and connects by itself. Needs working SysEx in both directions.</li>
+            <li>By hand: pick the <strong>Output (to GT-5)</strong> and <strong>Input (from GT-5)</strong> ports, the <strong>Device ID</strong> and the <strong>Patch change channel</strong> (the GT-5's MIDI receive channel), then <strong>Use these ports</strong>.</li>
+          </ul>
+        </li>
+        <li>Once connected the label turns green and shows the port and device ID. <strong>Go offline</strong> disconnects.</li>
+        <li>Right after connecting the GT-5 switches to the patch shown in the editor. The editor can't read it from the GT-5 (<a href="#sending">section 9</a>): until the patches came in with a Bulk Dump (or from a saved dump file), the label shows <em>not read</em> and edits are not sent, so the editor's default patch can't replace your own sound.</li>
+      </ol>
+      <p>The editor remembers the ports and reconnects on reload if the interface is plugged in. Unplug it and it goes offline. While offline every edit stays in the editor.</p>
+      <p class="note"><strong>Check:</strong> after connecting, change patch with ◀ ▶. If the GT-5's display follows, patch changes work. The connection dialog has a <strong>MIDI log</strong> of everything that goes out (→) and comes in (←): switch patches on the GT-5 with its footswitches and they show up there if its MIDI OUT reaches the computer.</p>
+      <p class="note">Auto-detect takes the patch change channel from the device ID (device ID 1 = channel 1). Whether that always holds on the GT-5 is not checked yet – if patch changes don't work, set it by hand to the GT-5's MIDI receive channel.</p>
+
+      <h2 id="header"><span class="num">4</span>The header</h2>
+      <p>The header is the same on every page and is always about the patch being edited.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Item</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td>◀ ▶ and the display</td><td>Patch change across all 250 patches (also <kbd>←</kbd> <kbd>→</kbd>). The red LEDs show the patch as group-bank-number, like the GT-5 itself: <code>U1-1-1</code>–<code>U4-5-5</code> are the 100 user patches, <code>P1-1-1</code>–<code>P6-5-5</code> the 150 presets. The green LCD shows the patch name and its PreAmp / OD types.</td></tr>
+          <tr><td>The patch name</td><td>Click it to rename the patch (up to 11 characters). <kbd>Enter</kbd> keeps it, <kbd>Esc</kbd> cancels.</td></tr>
+          <tr><td><strong>EDIT</strong></td><td>Lit while the patch has changes that are not stored yet.</td></tr>
+          <tr><td><strong>Write</strong></td><td>Stores the edited sound in a user patch; a dialog asks which one, then guides you: put the GT-5 on its BULK LOAD page ("waiting"), click Send, press EXIT on the GT-5 and wait about 5 seconds. Presets can't be overwritten.</td></tr>
+          <tr><td><strong>Revert</strong></td><td>Throws the changes away: back to the patch as it was when you selected it.</td></tr>
+          <tr><td><strong>Init patch</strong></td><td>Loads the init ("default") patch into the editor; Write stores it.</td></tr>
+          <tr><td><strong>Load file…</strong> / <strong>Save file…</strong></td><td>Files, see <a href="#files">section 10</a>.</td></tr>
+          <tr><td><strong>Read GT-5</strong></td><td>Tells you how to send a Bulk Dump from the GT-5 (the only way it gives its patches); the editor takes in what comes.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2 id="effects"><span class="num">5</span>Effects page</h2>
+      <h3>Patches (the patch map)</h3>
+      <p>User and Preset view, one group (5 banks × 5 patches) per page, paged with ‹ ›. Patches not read yet show an empty, dimmed slot with only their number; when connected, selecting one reads it from the GT-5. A <strong>dashed yellow border</strong> marks a patch changed only in the editor (e.g. loaded from a file or written offline) – the GT-5 still holds the old one.</p>
+
+      <h3>FX Chain</h3>
+      <p>On the GT-5 the order of all 15 effects is set per patch. The bar shows the patch's own order, and the pedals stand in it too. <strong>Drag</strong> an effect to its new place, or focus it and move it with <kbd>Alt</kbd> + <kbd>←</kbd> / <kbd>→</kbd>. Clicking an effect opens its detail panel.</p>
+
+      <h3>The pedals</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Block</th><th>What it is</th><th>Types</th></tr></thead>
+        <tbody>
+          <tr><td><span class="chip" style="--c:#6d57a6;--ink:#fff">FX1</span></td><td>Special effect 1</td><td>Feedbacker (with vibrato) or Slow Gear</td></tr>
+          <tr><td><span class="chip" style="--c:#2f6cc8;--ink:#fff">CS</span></td><td>Compressor</td><td>Compressor or Limiter</td></tr>
+          <tr><td><span class="chip" style="--c:#2a2b30;--ink:#e8e8ea">WAH</span></td><td>Wah</td><td>Pedal Wah or Auto Wah</td></tr>
+          <tr><td><span class="chip" style="--c:#8a8f99">LOOP</span></td><td>External effect loop</td><td>the rear SEND / RETURN jacks, at this place in the chain; Send level</td></tr>
+          <tr><td><span class="chip" style="--c:#f1c02c">OD/DS</span></td><td>Overdrive / Distortion</td><td>11 types from Natural OD to Fuzz, plus <em>Custom 1 / 2</em>, whose character is set on the System page</td></tr>
+          <tr><td><span class="chip" style="--c:#c39b45">PRE</span></td><td>Preamp</td><td>13 amps (JC-120, Clean Twin, Match Drive, Voxy Drive, MS 1959, SLDN Lead, Metal 5150 …), plus <em>Custom 1 / 2</em> from the System page; Bright, Gain</td></tr>
+          <tr><td><span class="chip" style="--c:#4b3a2f;--ink:#f2e6d6">SP</span></td><td>Speaker simulator</td><td>14 cabinets, mic position, mic and direct level</td></tr>
+          <tr><td><span class="chip" style="--c:#d5d8dd">EQ</span></td><td>4-band parametric EQ</td><td>with faders; the mid bands' frequency and Q are in the detail panel</td></tr>
+          <tr><td><span class="chip" style="--c:#2e9a8c;--ink:#fff">FX2</span></td><td>Modulation and more</td><td>Harmonist, Flanger, Phaser, Sub EQ, Short Delay, Humanizer, Ring Mod, Vibrato, Acoustic Sim, Guitar Synth</td></tr>
+          <tr><td><span class="chip" style="--c:#ececec">DD</span></td><td>Delay</td><td>Single, Tap, Reverse, Sound on Sound</td></tr>
+          <tr><td><span class="chip" style="--c:#7cc3e6;--ink:#0f1f28">CE</span></td><td>Chorus</td><td>Mono or Stereo</td></tr>
+          <tr><td><span class="chip" style="--c:#d4553b;--ink:#fff">TP</span></td><td>Tremolo / Pan</td><td>Tremolo or Pan, square or triangle</td></tr>
+          <tr><td><span class="chip" style="--c:#3b4966;--ink:#f2f4f8">RV</span></td><td>Reverb</td><td>Room 1/2, Hall 1/2, Plate</td></tr>
+          <tr><td><span class="chip" style="--c:#b8bdc5">NS</span></td><td>Noise suppressor</td><td>Threshold, Release</td></tr>
+          <tr><td><span class="chip" style="--c:#1e1f23;--ink:#e8e8ea">FV</span></td><td>Foot volume</td><td>no on/off switch; the expression pedal moves it</td></tr>
+        </tbody>
+      </table></div>
+      <p>At the end of the row is the <strong>Master</strong> module: the patch's output level.</p>
+      <ul>
+        <li><strong>On / off:</strong> click the pedal's footswitch. A pedal that is on lights its CHECK LED and a red bar below it.
+          <ul>
+            <li><strong>Live switch</strong> (a <code>CC20</code>…<code>CC27</code> tag on the pedal): the pedal switches through an assign of the patch and a MIDI CC – at once, with the GT-5's LED. The layout is fixed: Assign 1–8 = CC#20–27 → OD/DS, PRE, EQ, FX2, DD, CE, RV, WAH.</li>
+            <li><strong>Without a live switch</strong> switching off is heard at once, switching on only after <strong>Write</strong> (the LED blinks until then). The reason: an effect switched on by SysEx plays wrong on the GT-5 (clean, even the preamp's drive gone) until the patch is reloaded.</li>
+            <li><strong>Write</strong> puts the live switches into the patch (the GT-5's temporary patch takes no assign changes). If the patch uses its assigns for something else (32 of the factory user patches do), the editor asks whether to replace them. After an FX2 or Wah type change, Write updates the switch's target too. All 100 user patches at once: Library → Select shown → Write to GT-5.</li>
+            <li><strong>Live pedals only</strong> (right end of the FX Chain bar) shows only the 8 pedals with a live switch. It changes nothing else.</li>
+          </ul>
+        </li>
+        <li><strong>Type:</strong> on OD/DS, PRE, SP, FX2 and RV use the green ◀ ▶ window (click the name to pick from a list); on FX1, CS, WAH, DD and TP the switch. Changing the type swaps the pedal's knobs.</li>
+        <li><strong>Detail panel:</strong> a pedal only carries its main knobs. Click its <strong>name plate</strong> and a panel opens at the bottom with <strong>every</strong> parameter of that type, in groups. <kbd>Esc</kbd> or ✕ closes it.</li>
+      </ul>
+      <p><strong>Knobs:</strong> drag up or down with the mouse or a finger, use the mouse wheel (one step per notch), or focus one and use the keyboard: <kbd>↑</kbd> / <kbd>↓</kbd> one step, <kbd>PgUp</kbd> / <kbd>PgDn</kbd> a bigger step, <kbd>Home</kbd> / <kbd>End</kbd> minimum / maximum. On rate knobs the values above 100 are note values: <code>1/8</code> eighth, <code>1/8T</code> triplet, <code>1/8.</code> dotted.</p>
+
+      <h2 id="assign"><span class="num">6</span>EXP / CTL / Assign page</h2>
+      <p>These are part of the patch too: each patch can make the pedals do something different. On the left are the 10 controllers: the <strong>EXP pedal</strong>, the <strong>CTL pedal</strong> and <strong>Assign 1–8</strong>, each with whether it is on, what it controls and what moves it. For the selected one:</p>
+      <ul>
+        <li>The switch next to its name turns it on and off.</li>
+        <li><strong>Target:</strong> the 126 possible targets (effect on/off switches, the main parameters of every effect, the master and foot volume, manual mode, the tuner, MIDI start / stop), grouped by effect. <strong>Min</strong> and <strong>Max</strong> are shown in the target's own units – milliseconds for Delay Time, for example. Picking a new target sets Min to its minimum and Max to its maximum. With Min above Max the control should work the other way round (not yet checked on the unit).</li>
+        <li><strong>Source</strong> (assigns only): what moves it – the EXP pedal, the CTL pedal, the external EXP/CTL pedals, the <em>Internal Pedal</em>, the <em>Wave Pedal</em>, MIDI velocity / pitch bend, or an incoming MIDI CC. <strong>Mode:</strong> Normal (follows the pedal) or Toggle (each press switches). The <strong>active range</strong> is the part of the source's travel the control acts in.</li>
+        <li><strong>Response:</strong> the curve shows what target value each source position 0–127 gives.</li>
+        <li><strong>Internal pedal:</strong> a virtual pedal that, when triggered (e.g. by a patch change or the CTL pedal), "presses itself" over the given time along the chosen curve. <strong>Wave pedal:</strong> moves the target continuously with the chosen waveform and rate. These cards are dimmed when they are not the source.</li>
+      </ul>
+
+      <h2 id="library"><span class="num">7</span>Library page</h2>
+      <p>All 250 patches in a table: name, PreAmp and OD/DS type, the FX-1 and FX-2 types when on, the effects that are on as coloured dots (in chain order), and the state:</p>
+      <ul>
+        <li><strong>Not read</strong> – not read from the GT-5 yet;</li>
+        <li><strong>Editor only</strong> – changed in the editor, the GT-5 still has the old one;</li>
+        <li><strong>Editing</strong> – the patch you are editing, with unsaved changes.</li>
+      </ul>
+      <p>Filter at the top (User / Preset / All) or search by name. Click a patch number to open it on the Effects page. With patches ticked:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Button</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Select shown</strong> / <strong>Clear selection</strong></td><td>Ticks the patches shown (after filtering) / clears the ticks.</td></tr>
+          <tr><td><strong>Read from GT-5</strong></td><td>Tells you how to send them with a Bulk Dump from the GT-5 (it can't be asked for them).</td></tr>
+          <tr><td><strong>Write to GT-5</strong></td><td>After a confirmation, sends the editor's copies while the GT-5 is on BULK LOAD; EXIT on the GT-5 stores them (user patches only).</td></tr>
+          <tr><td><strong>Copy to…</strong></td><td>Copies them, in order, into consecutive user slots – in the editor only; Write to GT-5 takes them over.</td></tr>
+          <tr><td><strong>Init</strong></td><td>Puts the init patch in their place (in the editor only).</td></tr>
+          <tr><td><strong>Save selected…</strong></td><td>Saves them into one <code>.syx</code> file.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2 id="system"><span class="num">8</span>System page</h2>
+      <p>The GT-5's own settings, grouped as in the Qt program: <strong>Output</strong> (what amp / line the output feeds, and whether the speaker simulator follows the patch or is forced on or off), <strong>Global EQ / NS / Reverb</strong> (a correction for every patch), <strong>Tuner</strong>, <strong>Controls</strong> (dial function, the SUB CTL footswitches, assign hold), <strong>Patch change</strong>, <strong>MIDI</strong> (program change out and map, the pedals' CC output) and <strong>Manual mode</strong> (what the five footswitches switch).</p>
+      <p>Three GT-5 specialities are system settings too, shared by every patch that uses them:</p>
+      <ul>
+        <li><strong>Custom OD/DS 1 and 2</strong> – the character (bottom, attack, top, type, low / mid / high) of the OD/DS types <em>Custom 1</em> and <em>Custom 2</em>;</li>
+        <li><strong>Custom PreAmp 1 and 2</strong> – the voicing (bottom, top, volume type, 3-tone stack, clip, presence, gain, low / high, cabinet) of the preamp types <em>Custom 1</em> and <em>Custom 2</em>;</li>
+        <li><strong>User harmony scales</strong> – the 29 user scales of the Harmonist: pick one, then set the harmony for each of the 12 notes.</li>
+      </ul>
+      <ul>
+        <li>These are <strong>not patch settings</strong>: the GT-5 stores every change at once, so there is no Write here.</li>
+        <li>The GT-5 sends its system settings only in a Bulk Dump started on the unit; until one came in (or a file was loaded) the page shows the defaults.</li>
+        <li><strong>Send all to GT-5</strong> sends every setting shown (to restore a saved file, for example). <strong>Load file…</strong> / <strong>Save file…</strong>: all system settings in one file (1367 bytes, the FloorBoard's format).</li>
+      </ul>
+
+      <h2 id="sending"><span class="num">9</span>What reaches the GT-5, and when?</h2>
+      <p>Tried on a real GT-5 (October 2026). The GT-5 handles MIDI its own way – this is what works:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>What</th><th>How</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Patch change</strong></td><td>A Program Change at once; the GT-5 switches.</td></tr>
+          <tr><td><strong>Live editing</strong> (knobs, switches, types, name, chain order)</td><td>Goes straight into the GT-5's <em>temporary</em> patch, one parameter per message, each followed by a “Sound Change Request” – that makes it play at once, whatever the GT-5's display shows. A blinking dot on its display means the patch is edited. The GT-5 drops a parameter of a <strong>switched-off</strong> effect; for an effect with a live switch the editor sends it again when switching it on, the others play it after Write. The GT-5's EXIT button discards nothing. <strong>Not saved yet:</strong> changing patch loses it. EXP / CTL / Assign settings don't change in the temporary patch – they take effect only once the patch is written.</td></tr>
+          <tr><td><strong>Saving what you hear</strong></td><td>Either <strong>Write</strong> in the editor (next row), or the GT-5's own <strong>WRITE</strong> button: it stores the temporary patch, live edits included.</td></tr>
+          <tr><td><strong>Write / Write to GT-5</strong></td><td>The GT-5 stores patches only through its <strong>BULK LOAD</strong> page: UTILITY → MIDI → PARAMETER until BULK LOAD, which shows "waiting". The editor sends; the GT-5 shows "receiving". Then press <strong>EXIT</strong>: the GT-5 checks the data and stores it, which takes about 5 seconds. Sent while it plays normally, a write is ignored.</td></tr>
+          <tr><td><strong>Reading patches</strong></td><td>Only with a <strong>Bulk Dump started on the GT-5</strong> (UTILITY → MIDI → PARAMETER until BULK DUMP; choose the range, e.g. TEMP → TEMP for the current patch, or the whole memory). When asked by a program the GT-5 answers only the first block correctly and sends the rest in an internal format – the editor doesn't ask.</td></tr>
+          <tr><td><strong>Revert, Init patch, loading a file</strong></td><td>Only what changed is sent, slowly. A whole different patch is more than the GT-5 can take live (its MIDI buffer overflows: "overflow" on the display, EXIT clears it) – the editor then doesn't send it: Write it, then select it.</td></tr>
+          <tr><td><strong>System page</strong></td><td>Every change goes to the GT-5 at once.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2 id="files"><span class="num">10</span>Saving and loading</h2>
+      <p>Files go wherever the browser downloads to (usually <em>Downloads</em>), and you load them from wherever you like. The format is the Qt FloorBoard's <code>.syx</code>, so files move freely between the two programs.</p>
+      <ul>
+        <li><strong>Backup first:</strong> start a full Bulk Dump on the GT-5 (system + all user patches). The editor takes it in and goes to the Library page: Select shown → Save selected…, and System → Save file…. Long dumps can break off in the browser (see below); the dump then comes in more reliably with the small Windows tool in the project: <code>python tools\gt5_tester.py receive --in DOREMiDi --file my-gt5.syx</code> – and <strong>Load file…</strong> takes the whole dump (patches and system) into the editor.</li>
+        <li><strong>Save file…</strong> (header): <em>This patch, as edited</em>, or <em>All user patches</em> in one file.</li>
+        <li><strong>Load file…</strong> (header, or drop the file on the window): one patch goes into the editor, many into the user slots (<em>Editor only</em> until written), a system file to the System page, a full dump everywhere. Files with wrong checksums – common among old GT-5 files – load anyway.</li>
+        <li>You need a new dump only after changing patches <em>on the GT-5 itself</em>; what the editor wrote it knows.</li>
+      </ul>
+
+      <h2 id="problems"><span class="num">11</span>Troubleshooting</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Symptom</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td>"This browser has no Web MIDI"</td><td>The browser has no Web MIDI (e.g. Safari, iPhone). Use Chrome or Edge.</td></tr>
+          <tr><td>"MIDI access denied"</td><td>MIDI permission was blocked. Allow it in the site settings (the icon left of the address bar) and reload. If you opened the file directly and no prompt appears, start it from a local server (<a href="#start">section 2</a>).</td></tr>
+          <tr><td>"No MIDI ports found"</td><td>The interface isn't plugged in or wasn't recognised. Plug it in and open the connection dialog again.</td></tr>
+          <tr><td>"could not open any MIDI input"</td><td>Another program (the Qt FloorBoard, a DAW, another browser tab with the editor) holds the port. Close it and try again.</td></tr>
+          <tr><td>Nothing comes in any more – not even the GT-5's own patch changes in the MIDI log</td><td>The USB-MIDI interface's input got stuck (seen after long or broken SysEx). Unplug its USB plug, wait a few seconds, plug it back in.</td></tr>
+          <tr><td>A Bulk Dump breaks off in the browser</td><td>Take it with <code>tools\gt5_tester.py receive</code> and load the file (<a href="#files">section 10</a>). If nothing comes in afterwards, replug the interface (row above).</td></tr>
+          <tr><td>The GT-5 shows "overflow"</td><td>Its MIDI buffer filled up: too many changes in a row, or sent while it was in a menu. Press EXIT; edit on its normal display.</td></tr>
+          <tr><td>The GT-5 hangs on "DATA SENDING…"</td><td>Something asked it for patch data (this editor doesn't; the old FloorBoard and its auto-detect do). Switch it off and on.</td></tr>
+          <tr><td>"no GT-5 patch data in this file"</td><td>The file is from another unit (GT-3, GT-6 …) or not a patch file.</td></tr>
+          <tr><td>Patch changes don't work</td><td>The patch change channel differs from the GT-5's receive channel. Set it in the connection dialog.</td></tr>
+          <tr><td>Write did nothing</td><td>The GT-5 wasn't on BULK LOAD ("waiting") when the editor sent, or EXIT wasn't pressed afterwards (<a href="#sending">section 9</a>).</td></tr>
+          <tr><td>The name on the display doesn't change while editing</td><td>Normal: the GT-5 shows the stored name; the edited one appears when you press its WRITE button, and after storing.</td></tr>
+          <tr><td>A change was lost after changing patch</td><td>Write (or the GT-5's WRITE) before changing patch.</td></tr>
+        </tbody>
+      </table></div>
+    </article>
+  </div>
+
+  <footer>
+    <p>A fan project, not affiliated with BOSS / Roland Corporation. BOSS and GT-5 are trademarks of Roland Corporation. The parameter table and file format come from the open-source GT-5 FxFloorBoard.</p>
+  </footer>
+</div>
+</body>
+</html>
